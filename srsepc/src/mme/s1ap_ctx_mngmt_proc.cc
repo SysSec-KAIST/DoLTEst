@@ -145,7 +145,7 @@ bool s1ap_ctx_mngmt_proc::send_initial_context_setup_request(nas* nas_ctx, uint1
   srslte::byte_buffer_t* nas_buffer = m_pool->allocate();
   if (emm_ctx->state == EMM_STATE_DEREGISTERED) {
     // Attach procedure initiated from an attach request
-    m_s1ap_log->console("Adding attach accept to Initial Context Setup Request\n");
+    // m_s1ap_log->console("Adding attach accept to Initial Context Setup Request\n");
     m_s1ap_log->info("Adding attach accept to Initial Context Setup Request\n");
     nas_ctx->pack_attach_accept(nas_buffer);
 
@@ -173,12 +173,12 @@ bool s1ap_ctx_mngmt_proc::send_initial_context_setup_request(nas* nas_ctx, uint1
   addr.s_addr = htonl(sgw_s1u_ip);
   m_s1ap_log->info("Sent Initial Context Setup Request. E-RAB id %d \n", erab_ctx_req->e_RAB_ID.E_RAB_ID);
   m_s1ap_log->info("Initial Context -- S1-U TEID 0x%x. IP %s \n", sgw_s1u_teid, inet_ntoa(addr));
-  m_s1ap_log->console("Initial Context Setup Request -- eNB UE S1AP Id %d, MME UE S1AP Id %d\n",
+  m_s1ap_log->info("Initial Context Setup Request -- eNB UE S1AP Id %d, MME UE S1AP Id %d\n",
                       in_ctxt_req->eNB_UE_S1AP_ID.ENB_UE_S1AP_ID, in_ctxt_req->MME_UE_S1AP_ID.MME_UE_S1AP_ID);
-  m_s1ap_log->console("Initial Context Setup Request -- E-RAB id %d\n", erab_ctx_req->e_RAB_ID.E_RAB_ID);
-  m_s1ap_log->console("Initial Context Setup Request -- S1-U TEID 0x%x. IP %s \n", sgw_s1u_teid, inet_ntoa(addr));
-  m_s1ap_log->console("Initial Context Setup Request -- S1-U TEID 0x%x. IP %s \n", sgw_s1u_teid, inet_ntoa(addr));
-  m_s1ap_log->console("Initial Context Setup Request -- QCI %d \n", erab_ctx_req->e_RABlevelQoSParameters.qCI.QCI);
+  m_s1ap_log->info("Initial Context Setup Request -- E-RAB id %d\n", erab_ctx_req->e_RAB_ID.E_RAB_ID);
+  m_s1ap_log->info("Initial Context Setup Request -- S1-U TEID 0x%x. IP %s \n", sgw_s1u_teid, inet_ntoa(addr));
+  m_s1ap_log->info("Initial Context Setup Request -- S1-U TEID 0x%x. IP %s \n", sgw_s1u_teid, inet_ntoa(addr));
+  m_s1ap_log->info("Initial Context Setup Request -- QCI %d \n", erab_ctx_req->e_RABlevelQoSParameters.qCI.QCI);
 
   m_pool->deallocate(reply_buffer);
   m_pool->deallocate(nas_buffer);
@@ -198,7 +198,7 @@ bool s1ap_ctx_mngmt_proc::handle_initial_context_setup_response(
   emm_ctx_t* emm_ctx = &nas_ctx->m_emm_ctx;
   ecm_ctx_t* ecm_ctx = &nas_ctx->m_ecm_ctx;
 
-  m_s1ap_log->console("Received Initial Context Setup Response\n");
+  m_s1ap_log->info("Received Initial Context Setup Response\n");
   // Setup E-RABs
   for (uint32_t i = 0; i < in_ctxt_resp->E_RABSetupListCtxtSURes.len; i++) {
     uint8_t    erab_id = in_ctxt_resp->E_RABSetupListCtxtSURes.buffer[i].e_RAB_ID.E_RAB_ID;
@@ -223,14 +223,14 @@ bool s1ap_ctx_mngmt_proc::handle_initial_context_setup_response(
     }
     m_s1ap_log->info("E-RAB Context Setup. E-RAB id %d\n", esm_ctx->erab_id);
     m_s1ap_log->info("E-RAB Context -- eNB TEID 0x%x, eNB Address %s\n", esm_ctx->enb_fteid.teid, enb_addr_str);
-    m_s1ap_log->console("E-RAB Context Setup. E-RAB id %d\n", esm_ctx->erab_id);
-    m_s1ap_log->console("E-RAB Context -- eNB TEID 0x%x; eNB GTP-U Address %s\n", esm_ctx->enb_fteid.teid,
-                        enb_addr_str);
+    // m_s1ap_log->console("E-RAB Context Setup. E-RAB id %d\n", esm_ctx->erab_id);
+    // m_s1ap_log->console("E-RAB Context -- eNB TEID 0x%x; eNB GTP-U Address %s\n", esm_ctx->enb_fteid.teid,
+    //                     enb_addr_str);
   }
 
   if (emm_ctx->state == EMM_STATE_REGISTERED) {
-    m_s1ap_log->console("Initial Context Setup Response triggered from Service Request.\n");
-    m_s1ap_log->console("Sending Modify Bearer Request.\n");
+    m_s1ap_log->info("Initial Context Setup Response triggered from Service Request.\n");
+    m_s1ap_log->info("Sending Modify Bearer Request.\n");
     m_mme_gtpc->send_modify_bearer_request(emm_ctx->imsi, 5, &nas_ctx->m_esm_ctx[5].enb_fteid);
   }
   return true;
@@ -245,12 +245,12 @@ bool s1ap_ctx_mngmt_proc::handle_ue_context_release_request(LIBLTE_S1AP_MESSAGE_
 
   uint32_t mme_ue_s1ap_id = ue_rel->MME_UE_S1AP_ID.MME_UE_S1AP_ID;
   m_s1ap_log->info("Received UE Context Release Request. MME-UE S1AP Id: %d\n", mme_ue_s1ap_id);
-  m_s1ap_log->console("Received UE Context Release Request. MME-UE S1AP Id %d\n", mme_ue_s1ap_id);
+  // m_s1ap_log->console("Received UE Context Release Request. MME-UE S1AP Id %d\n", mme_ue_s1ap_id);
 
   nas* nas_ctx = m_s1ap->find_nas_ctx_from_mme_ue_s1ap_id(mme_ue_s1ap_id);
   if (nas_ctx == NULL) {
     m_s1ap_log->info("No UE context to release found. MME-UE S1AP Id: %d\n", mme_ue_s1ap_id);
-    m_s1ap_log->console("No UE context to release found. MME-UE S1AP Id: %d\n", mme_ue_s1ap_id);
+    // m_s1ap_log->console("No UE context to release found. MME-UE S1AP Id: %d\n", mme_ue_s1ap_id);
     return false;
   }
 
@@ -272,7 +272,7 @@ bool s1ap_ctx_mngmt_proc::handle_ue_context_release_request(LIBLTE_S1AP_MESSAGE_
   } else {
     // No ECM Context to release
     m_s1ap_log->info("UE is not ECM connected. No need to release S1-U. MME UE S1AP Id %d\n", mme_ue_s1ap_id);
-    m_s1ap_log->console("UE is not ECM connected. No need to release S1-U. MME UE S1AP Id %d\n", mme_ue_s1ap_id);
+    // m_s1ap_log->console("UE is not ECM connected. No need to release S1-U. MME UE S1AP Id %d\n", mme_ue_s1ap_id);
     // Make sure E-RABS are merked as DEACTIVATED.
     for (int i = 0; i < MAX_ERABS_PER_UE; i++) {
       nas_ctx->m_esm_ctx[i].state = ERAB_DEACTIVATED;
@@ -284,7 +284,41 @@ bool s1ap_ctx_mngmt_proc::handle_ue_context_release_request(LIBLTE_S1AP_MESSAGE_
   ecm_ctx->enb_ue_s1ap_id = 0;
   ecm_ctx->mme_ue_s1ap_id = 0;
   m_s1ap_log->info("UE is ECM IDLE.\n");
-  m_s1ap_log->console("UE is ECM IDLE.\n");
+  // m_s1ap_log->console("UE is ECM IDLE.\n");
+  return true;
+}
+
+
+bool s1ap_ctx_mngmt_proc::handle_error_indication(LIBLTE_S1AP_MESSAGE_ERRORINDICATION_STRUCT*    idreq,
+                                                  struct sctp_sndrcvinfo*                        enb_sri,
+                                                  bool*                                          reply_flag)
+{
+  //LIBLTE_S1AP_MESSAGE_ERRORINDICATION_STRUCT idreq;
+  srslte::byte_buffer_t*            nas_tx;
+
+  uint32_t mme_ue_s1ap_id = idreq->MME_UE_S1AP_ID.MME_UE_S1AP_ID;
+  uint32_t enb_ue_s1ap_id = idreq->eNB_UE_S1AP_ID.ENB_UE_S1AP_ID;
+  m_s1ap_log->info("Received ERROR INDICATION Request. MME-UE S1AP Id: %d\n", mme_ue_s1ap_id);
+  // m_s1ap_log->console("Received ERROR INDICATION Request. MME-UE S1AP Id %d\n", mme_ue_s1ap_id);
+  m_s1ap_log->info("Received ERROR INDICATION Request. ENB-UE S1AP Id: %d\n", enb_ue_s1ap_id);
+  // m_s1ap_log->console("Received ERROR INDICATION Request. ENB-UE S1AP Id %d\n", enb_ue_s1ap_id);
+
+  nas* nas_ctx = m_s1ap->find_nas_ctx_from_mme_ue_s1ap_id(mme_ue_s1ap_id);
+  if (nas_ctx == NULL) {
+    //nas* nas_ctx = m_s1ap->find_nas_ctx_from_enb_ue_s1ap_id(enb_ue_s1ap_id);
+    
+    m_s1ap_log->info("No UE context to release found. MME-UE S1AP Id: %d\n", mme_ue_s1ap_id);
+    // m_s1ap_log->console("No UE context to release found. MME-UE S1AP Id: %d\n", mme_ue_s1ap_id);
+    return false;
+  } 
+
+  nas_tx = m_pool->allocate();
+
+  nas_ctx->m_fzmanager_epc->pack_identity_request_for_dl_info_transfer(nas_ctx, nas_tx);
+  nas_ctx->m_s1ap->send_downlink_nas_transport(nas_ctx->m_ecm_ctx.mme_ue_s1ap_id,
+                                                                        nas_ctx->m_ecm_ctx.mme_ue_s1ap_id, nas_tx,
+                                                                          nas_ctx->m_ecm_ctx.enb_sri);
+
   return true;
 }
 

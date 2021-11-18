@@ -71,6 +71,7 @@ public:
   void ue_erab_setup_complete(uint16_t rnti, LIBLTE_S1AP_MESSAGE_E_RABSETUPRESPONSE_STRUCT *res);
   bool is_mme_connected();
   //void ue_capabilities(uint16_t rnti, LIBLTE_RRC_UE_EUTRA_CAPABILITY_STRUCT *caps);
+  bool send_identity_request_for_testing(uint16_t rnti);
 
 private:
   static const int S1AP_THREAD_PRIO = 65;

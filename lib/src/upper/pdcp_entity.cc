@@ -157,6 +157,49 @@ void pdcp_entity::write_sdu(unique_byte_buffer_t sdu, bool blocking)
   rlc->write_sdu(lcid, std::move(sdu), blocking);
 }
 
+void pdcp_entity::write_sdu_doltest(unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest, bool blocking)
+{
+  log->info_hex(sdu->msg, sdu->N_bytes,
+        "TX %s SDU, SN: %d, do_integrity = %s, do_encryption = %s",
+        rrc->get_rb_name(lcid).c_str(), tx_count,
+        (do_integrity) ? "true" : "false", (do_encryption) ? "true" : "false");
+
+  pthread_mutex_lock(&mutex);
+
+  if (cfg.is_control) {
+    pdcp_pack_control_pdu(tx_count, sdu.get());
+//    if(do_integrity) {
+      integrity_generate_doltest(sdu->msg,
+                         sdu->N_bytes-4,
+                         &sdu->msg[sdu->N_bytes-4],
+                         integ_algo_doltest);
+//    }
+  }
+
+  if (cfg.is_data) {
+    if(12 == cfg.sn_len) {
+      pdcp_pack_data_pdu_long_sn(tx_count, sdu.get());
+    } else {
+      pdcp_pack_data_pdu_short_sn(tx_count, sdu.get());
+    }
+  }
+
+//  if(do_encryption) {
+    cipher_encrypt_doltest(&sdu->msg[sn_len_bytes],
+                   sdu->N_bytes-sn_len_bytes,
+                   &sdu->msg[sn_len_bytes],
+                   cipher_algo_doltest);
+    log->info_hex(sdu->msg, sdu->N_bytes, "TX %s SDU (encrypted)", rrc->get_rb_name(lcid).c_str());
+//  }
+  tx_count++;
+
+  pthread_mutex_unlock(&mutex);
+
+  rlc->write_sdu(lcid, std::move(sdu), blocking);
+}
+
+
+
 void pdcp_entity::config_security(uint8_t *k_rrc_enc_,
                                   uint8_t *k_rrc_int_,
                                   uint8_t *k_up_enc_,
@@ -378,6 +421,53 @@ void pdcp_entity::integrity_generate( uint8_t  *msg,
   log->debug_hex(mac,     4, "MAC (generated)");
 }
 
+void pdcp_entity::integrity_generate_doltest( uint8_t  *msg,
+                                      uint32_t  msg_len,
+                                      uint8_t  *mac,
+                                      INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest)
+{
+  switch(integ_algo_doltest)
+  {
+  case INTEGRITY_ALGORITHM_ID_EIA0:
+    break;
+  case INTEGRITY_ALGORITHM_ID_128_EIA1:
+    security_128_eia1(&k_rrc_int[16],
+                      tx_count,
+                      cfg.bearer_id - 1,
+                      cfg.direction,
+                      msg,
+                      msg_len,
+                      mac);
+    break;
+  case INTEGRITY_ALGORITHM_ID_128_EIA2:
+    security_128_eia2(&k_rrc_int[16],
+                      tx_count,
+                      cfg.bearer_id - 1,
+                      cfg.direction,
+                      msg,
+                      msg_len,
+                      mac);
+    mac[0]=255;
+    mac[2]=255;
+    mac[1]=0;
+    mac[3]=0;
+
+    break;
+  default:
+    break;
+  }
+
+  log->debug("Integrity gen input:\n");
+  log->debug_hex(&k_rrc_int[16], 16, "  K_rrc_int");
+  log->debug("  Local count: %d\n", tx_count);
+  log->debug("  Bearer ID: %d\n", cfg.bearer_id);
+  log->debug("  Direction: %s\n", (cfg.direction == SECURITY_DIRECTION_DOWNLINK) ? "Downlink" : "Uplink");
+  log->debug_hex(msg, msg_len, "  Message");
+  log->debug_hex(mac,     4, "MAC (generated)");
+}
+
+
+
 bool pdcp_entity::integrity_verify(uint8_t  *msg,
                                    uint32_t  count,
                                    uint32_t  msg_len,
@@ -494,6 +584,60 @@ void pdcp_entity::cipher_encrypt(uint8_t  *msg,
     break;
   }
 }
+
+void pdcp_entity::cipher_encrypt_doltest(uint8_t  *msg,
+                                 uint32_t  msg_len,
+                                 uint8_t  *ct,
+                                 CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest)
+{
+  byte_buffer_t ct_tmp;
+  uint8_t *k_enc;
+
+  // If control plane use RRC encrytion key. If data use user plane key
+  if (cfg.is_control) {
+    k_enc = k_rrc_enc;
+  } else {
+    k_enc = k_up_enc;
+  }
+
+  log->debug("Cipher encrypt input:\n");
+  log->debug_hex(&k_enc[16], 16, "  K_enc");
+  log->debug("  Local count: %d\n", tx_count);
+  log->debug("  TX HFN: %d COUNT %d\n", (tx_count >> cfg.sn_len), (tx_count << (32-cfg.sn_len)) >> (32-cfg.sn_len));
+  log->debug("  Bearer ID: %d\n", cfg.bearer_id);
+  log->debug("  Direction: %s\n", (cfg.direction == SECURITY_DIRECTION_DOWNLINK) ? "Downlink" : "Uplink");
+
+  switch(cipher_algo_doltest)
+  {
+  case CIPHERING_ALGORITHM_ID_EEA0:
+    break;
+  case CIPHERING_ALGORITHM_ID_128_EEA1:
+    security_128_eea1(&(k_enc[16]),
+                      tx_count,
+                      cfg.bearer_id - 1,
+                      cfg.direction,
+                      msg,
+                      msg_len,
+                      ct_tmp.msg);
+    memcpy(ct, ct_tmp.msg, msg_len);
+    break;
+  case CIPHERING_ALGORITHM_ID_128_EEA2:
+    security_128_eea2(&(k_enc[16]),
+                      tx_count,
+                      cfg.bearer_id - 1,
+                      cfg.direction,
+                      msg,
+                      msg_len,
+                      ct_tmp.msg);
+    memcpy(ct, ct_tmp.msg, msg_len);
+    break;
+  default:
+    break;
+  }
+}
+
+
+
 
 void pdcp_entity::cipher_decrypt(uint8_t  *ct,
                                  uint32_t  count,

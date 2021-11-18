@@ -155,7 +155,7 @@ void spgw::gtpc::handle_s11_pdu(srslte::byte_buffer_t* msg)
 {
   // FIXME add deserialization code here
   srslte::gtpc_pdu* pdu = (srslte::gtpc_pdu*)msg->msg;
-  m_gtpc_log->console("Received GTP-C PDU. Message type: %s\n", srslte::gtpc_msg_type_to_str(pdu->header.type));
+  // m_gtpc_log->console("Received GTP-C PDU. Message type: %s\n", srslte::gtpc_msg_type_to_str(pdu->header.type));
   m_gtpc_log->debug("Received GTP-C PDU. Message type: %s\n", srslte::gtpc_msg_type_to_str(pdu->header.type));
   switch (pdu->header.type) {
     case srslte::GTPC_MSG_TYPE_CREATE_SESSION_REQUEST:
@@ -444,11 +444,11 @@ spgw_tunnel_ctx_t* spgw::gtpc::create_gtpc_ctx(const struct srslte::gtpc_create_
 
   uint8_t default_bearer_id = 5;
 
-  m_gtpc_log->console("SPGW: Allocated Ctrl TEID %" PRIu64 "\n", spgw_uplink_ctrl_teid);
-  m_gtpc_log->console("SPGW: Allocated User TEID %" PRIu64 "\n", spgw_uplink_user_teid);
+  m_gtpc_log->info("SPGW: Allocated Ctrl TEID %" PRIu64 "\n", spgw_uplink_ctrl_teid);
+  m_gtpc_log->info("SPGW: Allocated User TEID %" PRIu64 "\n", spgw_uplink_user_teid);
   struct in_addr ue_ip_;
   ue_ip_.s_addr = ue_ip;
-  m_gtpc_log->console("SPGW: Allocate UE IP %s\n", inet_ntoa(ue_ip_));
+  m_gtpc_log->info("SPGW: Allocate UE IP %s\n", inet_ntoa(ue_ip_));
 
   // Save the UE IP to User TEID map
   spgw_tunnel_ctx_t* tunnel_ctx = new spgw_tunnel_ctx_t;

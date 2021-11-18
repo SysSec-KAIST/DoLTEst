@@ -51,6 +51,7 @@ public:
 
   // RRC interface
   virtual void     write_sdu(unique_byte_buffer_t sdu, bool blocking) = 0;
+  virtual void     write_sdu_doltest(unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest, bool blocking) = 0;
   virtual void config_security(uint8_t *k_rrc_enc_,
                        uint8_t *k_rrc_int_,
                        uint8_t *k_up_enc_,

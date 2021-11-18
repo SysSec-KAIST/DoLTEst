@@ -131,6 +131,9 @@ void parse_args(all_args_t* args, int argc, char* argv[])
     ("pcap.enable",   bpo::value<bool>(&args->mme_args.s1ap_args.pcap_enable)->default_value(false),         "Enable S1AP PCAP")
     ("pcap.filename", bpo::value<string>(&args->mme_args.s1ap_args.pcap_filename)->default_value("/tmp/epc.pcap"), "PCAP filename")
 
+    ("reset-ctxt-mode",   bpo::value<bool>(&args->mme_args.s1ap_args.reset_ctxt_mode)->default_value(false),         "Enable reset context mode")
+    ("long-test-mode",   bpo::value<bool>(&args->mme_args.s1ap_args.long_test_mode)->default_value(false),         "Enable long test mode")
+
     ("log.nas_level",           bpo::value<string>(&args->log_args.nas_level),        "MME NAS  log level")
     ("log.nas_hex_limit",       bpo::value<int>(&args->log_args.nas_hex_limit),       "MME NAS log hex dump limit")
     ("log.s1ap_level",          bpo::value<string>(&args->log_args.s1ap_level),       "MME S1AP log level")
@@ -395,6 +398,15 @@ int main(int argc, char* argv[])
   srslte::logger_stdout logger_stdout;
   srslte::logger_file   logger_file;
   srslte::logger*       logger;
+
+  printf(R"( 
+   ____        _   _____ _____     _     (\_/)     
+  |  _ \  ___ | | |_   _| ____|___| |_   (O.o) 
+  | | | |/ _ \| |   | | |  _| / __| __|  (> <) 
+  | |_| | (_) | |___| | | |___\__ \ |_   ----- 
+  |____/ \___/|_____|_| |_____|___/\__|  (EPC)
+  )");
+  printf("\n");
 
   /*Init logger*/
   if (!args.log_args.filename.compare("stdout")) {

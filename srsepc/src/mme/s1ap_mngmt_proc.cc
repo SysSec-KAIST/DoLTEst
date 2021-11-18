@@ -103,7 +103,7 @@ bool s1ap_mngmt_proc::handle_s1_setup_request(LIBLTE_S1AP_MESSAGE_S1SETUPREQUEST
     }
 
     pack_s1_setup_response(m_s1ap_args, reply_buffer);
-    m_s1ap_log->console("Sending S1 Setup Response\n");
+    m_s1ap_log->console("Sending S1 Setup Response\n\n");
     m_s1ap_log->info("Sending S1 Setup Response\n");
   }
 

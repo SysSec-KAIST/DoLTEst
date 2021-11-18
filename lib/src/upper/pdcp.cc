@@ -111,6 +111,18 @@ void pdcp::write_sdu(uint32_t lcid, unique_byte_buffer_t sdu, bool blocking)
   pthread_rwlock_unlock(&rwlock);
 }
 
+void pdcp::write_sdu_doltest(uint32_t lcid, unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest, bool blocking)
+{
+  pthread_rwlock_rdlock(&rwlock);
+  if (valid_lcid(lcid)) {
+    pdcp_array.at(lcid)->write_sdu_doltest(std::move(sdu), integ_algo_doltest, cipher_algo_doltest, blocking);
+  } else {
+    pdcp_log->warning("Writing sdu: lcid=%d. Deallocating sdu\n", lcid);
+  }
+  pthread_rwlock_unlock(&rwlock);
+}
+
+
 void pdcp::write_sdu_mch(uint32_t lcid, unique_byte_buffer_t sdu)
 {
   pthread_rwlock_rdlock(&rwlock);

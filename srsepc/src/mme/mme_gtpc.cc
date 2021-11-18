@@ -164,7 +164,7 @@ void mme_gtpc::handle_s11_pdu(srslte::byte_buffer_t* msg)
 bool mme_gtpc::send_create_session_request(uint64_t imsi)
 {
   m_mme_gtpc_log->info("Sending Create Session Request.\n");
-  m_mme_gtpc_log->console("Sending Create Session Request.\n");
+  // m_mme_gtpc_log->console("Sending Create Session Request.\n");
   struct srslte::gtpc_pdu                     cs_req_pdu;
   struct srslte::gtpc_create_session_request* cs_req = &cs_req_pdu.choice.create_session_request;
 
@@ -187,8 +187,8 @@ bool mme_gtpc::send_create_session_request(uint64_t imsi)
 
   m_mme_gtpc_log->info("Next MME control TEID: %d\n", m_next_ctrl_teid);
   m_mme_gtpc_log->info("Allocated MME control TEID: %d\n", cs_req->sender_f_teid.teid);
-  m_mme_gtpc_log->console("Creating Session Response -- IMSI: %" PRIu64 "\n", imsi);
-  m_mme_gtpc_log->console("Creating Session Response -- MME control TEID: %d\n", cs_req->sender_f_teid.teid);
+  m_mme_gtpc_log->info("Creating Session Response -- IMSI: %" PRIu64 "\n", imsi);
+  m_mme_gtpc_log->info("Creating Session Response -- MME control TEID: %d\n", cs_req->sender_f_teid.teid);
 
   // APN
   strncpy(cs_req->apn, m_s1ap->m_s1ap_args.mme_apn.c_str(), sizeof(cs_req->apn) - 1);
@@ -235,7 +235,7 @@ bool mme_gtpc::handle_create_session_response(srslte::gtpc_pdu* cs_resp_pdu)
 {
   struct srslte::gtpc_create_session_response* cs_resp = &cs_resp_pdu->choice.create_session_response;
   m_mme_gtpc_log->info("Received Create Session Response\n");
-  m_mme_gtpc_log->console("Received Create Session Response\n");
+  // m_mme_gtpc_log->console("Received Create Session Response\n");
   if (cs_resp_pdu->header.type != srslte::GTPC_MSG_TYPE_CREATE_SESSION_RESPONSE) {
     m_mme_gtpc_log->warning("Could not create GTPC session. Not a create session response\n");
     // TODO Handle error
@@ -267,11 +267,11 @@ bool mme_gtpc::handle_create_session_response(srslte::gtpc_pdu* cs_resp_pdu)
     m_mme_gtpc_log->error("Did not receive SGW S1-U F-TEID in create session response\n");
     return false;
   }
-  m_mme_gtpc_log->console("Create Session Response -- SPGW control TEID %d\n", sgw_ctr_fteid.teid);
+  // m_mme_gtpc_log->console("Create Session Response -- SPGW control TEID %d\n", sgw_ctr_fteid.teid);
   m_mme_gtpc_log->info("Create Session Response -- SPGW control TEID %d\n", sgw_ctr_fteid.teid);
   in_addr s1u_addr;
   s1u_addr.s_addr = cs_resp->eps_bearer_context_created.s1_u_sgw_f_teid.ipv4;
-  m_mme_gtpc_log->console("Create Session Response -- SPGW S1-U Address: %s\n", inet_ntoa(s1u_addr));
+  // m_mme_gtpc_log->console("Create Session Response -- SPGW S1-U Address: %s\n", inet_ntoa(s1u_addr));
   m_mme_gtpc_log->info("Create Session Response -- SPGW S1-U Address: %s\n", inet_ntoa(s1u_addr));
 
   // Check UE Ipv4 address was allocated
@@ -295,7 +295,7 @@ bool mme_gtpc::handle_create_session_response(srslte::gtpc_pdu* cs_resp_pdu)
 
   // Save UE IP to nas ctxt
   emm_ctx->ue_ip.s_addr = cs_resp->paa.ipv4;
-  m_mme_gtpc_log->console("SPGW Allocated IP %s to IMSI %015" PRIu64 "\n", inet_ntoa(emm_ctx->ue_ip), emm_ctx->imsi);
+  m_mme_gtpc_log->info("SPGW Allocated IP %s to IMSI %015" PRIu64 "\n", inet_ntoa(emm_ctx->ue_ip), emm_ctx->imsi);
 
   // Save SGW ctrl F-TEID in GTP-C context
   std::map<uint64_t, struct gtpc_ctx>::iterator it_g = m_imsi_to_gtpc_ctx.find(imsi);

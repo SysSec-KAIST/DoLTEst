@@ -73,6 +73,7 @@ public:
 
   // RRC interface
   void     write_sdu(unique_byte_buffer_t sdu, bool blocking);
+  void     write_sdu_doltest(unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest, bool blocking);
   void config_security(uint8_t *k_rrc_enc_,
                        uint8_t *k_rrc_int_,
                        uint8_t *k_up_enc_,
@@ -125,6 +126,10 @@ private:
   bool integrity_verify(uint8_t* msg, uint32_t count, uint32_t msg_len, uint8_t* mac);
   void cipher_encrypt(uint8_t* msg, uint32_t msg_len, uint8_t* ct);
   void cipher_decrypt(uint8_t* ct, uint32_t count, uint32_t ct_len, uint8_t* msg);
+
+  void integrity_generate_doltest(uint8_t* msg, uint32_t msg_len, uint8_t* mac, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest);
+  void cipher_encrypt_doltest(uint8_t* msg, uint32_t msg_len, uint8_t* ct, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest);
+
 };
 
 /****************************************************************************

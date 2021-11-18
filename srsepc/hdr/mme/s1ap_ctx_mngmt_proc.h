@@ -50,6 +50,10 @@ public:
   bool send_ue_context_release_command(nas* nas_ctx);
   bool handle_ue_context_release_complete(LIBLTE_S1AP_MESSAGE_UECONTEXTRELEASECOMPLETE_STRUCT* rel_comp);
 
+  bool handle_error_indication(LIBLTE_S1AP_MESSAGE_ERRORINDICATION_STRUCT*                   idreq,
+                                         struct sctp_sndrcvinfo*                             enb_sri,
+                                         bool*                                               reply_flag);
+
 private:
   s1ap_ctx_mngmt_proc();
   virtual ~s1ap_ctx_mngmt_proc();

@@ -1,217 +1,115 @@
-srsLTE
+Description
+========
+DoLTEst is a negative testing framework to uncover the non-standard-compliant behaviors in LTE implementations of end-user devices.
+Despite numerous implementation vulnerabilities reported, a lack of negative testing in specification still leaves other implementation vulnerabilities unchecked.
+It is an abbreviation for "Downlink LTE Test" or "(Let's) Do LTE Test" 😉. 
+
+## What is DoLTEst for?
+An implementation flaw in LTE control plane protocols at end-user devices directly leads to severe security threats. In order to uncover these flaws, conducting negative testing is a promising approach, whose test case only contains invalid or prohibited messages. Despite its importance, the cellular standard mostly focuses on positive test cases, producing many implementation vulnerabilities unchecked, as evidenced by many existing vulnerabilities.
+
+To fill this gap, we present DoLTEst, a negative testing framework, which can comprehensively test an end-user device. Enumerable test cases with a deterministic oracle produced from detailed specification analysis make it suitable to be used as a standard to find implementation vulnerabilities. We uncovered 26 implementation flaws from 43 devices from 5 different baseband manufacturers by using DoLTEst, demonstrating its effectiveness.
+
+| ![DoLTEst.png](./img/DoLTEst.png) | 
+|:--:| 
+| *Overview of DoLTEst. This repository mainly covers ➃, and the rests are DESIGN part* |
+ 
+Also, the test cases covered in DoLTEst are shown below. 
+
+ 
+| ![testcase.png](./img/testcases.png) | 
+|:--:| 
+| *Guidelines and the corresponding number of test cases. Note that if the guideline involves two IEs (i.e., handover procedure by using RRCConnectionReconfiguration), DoLTEst adds both IEs in generating test cases. We omitted non-trivial IE values for brevity. The * represents the wildcard explained in §5.2.2. We used RRC specification version 15.10.0 [[7](https://www.etsi.org/deliver/etsi_ts/136300_136399/136331/15.10.00_60/ts_136331v151000p.pdf)], and NAS specification version 16.5.1 [[4](https://www.etsi.org/deliver/etsi_ts/124300_124399/124301/16.05.01_60/ts_124301v160501p.pdf)].* |
+
+
+Please refer to [our
+paper](https://www.usenix.org/system/files/sec22summer_park-cheoljun.pdf) for more details. 
+
+
+DoLTEst Manual
 ========
 
-[![Build Status](https://travis-ci.org/srsLTE/srsLTE.svg?branch=master)](https://travis-ci.org/srsLTE/srsLTE)
+DoLTEst is implemented on top of the [srsLTE](https://github.com/srsran/srsRAN).
+So it requires the same setup as when establishing your own LTE network using srsENB, srsEPC, and a COTS UE.
+Please refer to the [SRS team's docs](https://docs.srsran.com/en/latest/app_notes/source/cots_ue/source/index.html?highlight=sim#hardware-required) for the set-up details. 
 
-srsLTE is a free and open-source LTE software suite developed by SRS (www.softwareradiosystems.com). 
-
-It includes:
-  * srsUE - a complete SDR LTE UE application featuring all layers from PHY to IP
-  * srsENB - a complete SDR LTE eNodeB application 
-  * srsEPC - a light-weight LTE core network implementation with MME, HSS and S/P-GW
-  * a highly modular set of common libraries for PHY, MAC, RLC, PDCP, RRC, NAS, S1AP and GW layers. 
-
-srsLTE is released under the AGPLv3 license and uses software from the OpenLTE project (http://sourceforge.net/projects/openlte) for some security functions and for NAS message parsing.
-
-Common Features
----------------
-
- * LTE Release 10 aligned
- * Tested bandwidths: 1.4, 3, 5, 10, 15 and 20 MHz
- * Transmission mode 1 (single antenna), 2 (transmit diversity), 3 (CCD) and 4 (closed-loop spatial multiplexing)
- * Frequency-based ZF and MMSE equalizer
- * Evolved multimedia broadcast and multicast service (eMBMS)
- * Highly optimized Turbo Decoder available in Intel SSE4.1/AVX2 (+100 Mbps) and standard C (+25 Mbps)
- * MAC, RLC, PDCP, RRC, NAS, S1AP and GW layers
- * Detailed log system with per-layer log levels and hex dumps
- * MAC layer wireshark packet capture
- * Command-line trace metrics
- * Detailed input configuration files
- * Channel simulator for EPA, EVA, and ETU 3GPP channels
- * ZeroMQ-based fake RF driver for I/Q over IPC/network  
-
-srsUE Features
---------------
-
- * FDD and TDD configuration
- * Carrier Aggregation support
- * Cell search and synchronization procedure for the UE
- * Soft USIM supporting Milenage and XOR authentication
- * Hard USIM support using PCSC framework
- * Virtual network interface *tun_srsue* created upon network attach
- * QoS support
- * 150 Mbps DL in 20 MHz MIMO TM3/TM4 configuration in i7 Quad-Core CPU.
- * 75 Mbps DL in 20 MHz SISO configuration in i7 Quad-Core CPU.
- * 36 Mbps DL in 10 MHz SISO configuration in i5 Dual-Core CPU.
-
-srsUE has been fully tested and validated with the following network equipment: 
- * Amarisoft LTE100 eNodeB and EPC
- * Nokia FlexiRadio family FSMF system module with 1800MHz FHED radio module and TravelHawk EPC simulator
- * Huawei DBS3900 
- * Octasic Flexicell LTE-FDD NIB
-
-srsENB Features
----------------
-
- * FDD configuration
- * Round Robin MAC scheduler with FAPI-like C++ API
- * SR support
- * Periodic and Aperiodic CQI feedback support
- * Standard S1AP and GTP-U interfaces to the Core Network
- * 150 Mbps DL in 20 MHz MIMO TM3/TM4 with commercial UEs
- * 75 Mbps DL in SISO configuration with commercial UEs
- * 50 Mbps UL in 20 MHz with commercial UEs
- * User-plane encryption
-
-srsENB has been tested and validated with the following handsets:
- * LG Nexus 5 and 4
- * Motorola Moto G4 plus and G5
- * Huawei P9/P9lite, P10/P10lite, P20/P20lite
- * Huawei dongles: E3276 and E398
-
-srsEPC Features
----------------
-
- * Single binary, light-weight LTE EPC implementation with:
-   * MME (Mobility Management Entity) with standard S1AP and GTP-U interface to eNB
-   * S/P-GW with standard SGi exposed as virtual network interface (TUN device)
-   * HSS (Home Subscriber Server) with configurable user database in CSV format
- * Support for paging
-
-Hardware
---------
-
-The library currently supports the Ettus Universal Hardware Driver (UHD) and the bladeRF driver. Thus, any hardware supported by UHD or bladeRF can be used. There is no sampling rate conversion, therefore the hardware should support 30.72 MHz clock in order to work correctly with LTE sampling frequencies and decode signals from live LTE base stations. 
-
-We have tested the following hardware: 
- * USRP B210
- * USRP B205mini
- * USRP X300
- * limeSDR
- * bladeRF
-
-Build Instructions
-------------------
-
-* Mandatory requirements: 
-  * Common:
-    * cmake              https://cmake.org/
-    * libfftw            http://www.fftw.org/
-    * PolarSSL/mbedTLS   https://tls.mbed.org
-  * srsUE:
-    * Boost:             http://www.boost.org
-  * srsENB:
-    * Boost:             http://www.boost.org
-    * lksctp:            http://lksctp.sourceforge.net/
-    * config:            http://www.hyperrealm.com/libconfig/
-  * srsEPC:
-    * Boost:             http://www.boost.org
-    * lksctp:            http://lksctp.sourceforge.net/
-    * config:            http://www.hyperrealm.com/libconfig/
-
-For example, on Ubuntu 17.04, one can install the required libraries with:
+**Prerequisite**
+ - Software-Defined Radio (SDR). We used USRP B210.
+ - Ubuntu PC (we used 18.04) that can execute the srsLTE. 
+ - Programmable SIM card (and smart card reader). We used [sysmoISIM](http://shop.sysmocom.de/products/sysmoISIM-SJA2). 
+ - Test UE
+ - Faraday cage (recommended)
+ 
+**About using a Faraday cage**
+ >We recommend you to use a Faraday cage. Otherwise, nearby UEs may attempt to connect. This can cause DoS in normal UEs, even though DoLTEst does not send a test message to an unknown UE. Also, operating an LTE signal on licensed frequencies might be illegal in your country (Each country has unique regulations regarding the wireless transmission of signals, and these regulations are drafted, implemented, and modified by each country's government, not by an international organization).
+ 
+***Dependencies***
 ```
-sudo apt-get install cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
-```
-or on Fedora:
-```
-dnf install cmake fftw3-devel polarssl-devel lksctp-tools-devel libconfig-devel boost-devel
+sudo apt-get install build-essential cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
 ```
 
-Note that depending on your flavor and version of Linux, the actual package names may be different.
-
-* Optional requirements: 
-  * srsgui:              https://github.com/srslte/srsgui - for real-time plotting.
-  * libpcsclite-dev:     https://pcsclite.apdu.fr/ - for accessing smart card readers
-
-* RF front-end driver:
-  * UHD:                 https://github.com/EttusResearch/uhd
-  * SoapySDR:            https://github.com/pothosware/SoapySDR
-  * BladeRF:             https://github.com/Nuand/bladeRF
-  * ZeroMQ:              https://github.com/zeromq
-
-Download and build srsLTE: 
+**Building**
 ```
-git clone https://github.com/srsLTE/srsLTE.git
-cd srsLTE
-mkdir build
-cd build
-cmake ../
-make
-make test
+git clone https://github.com/SysSec-KAIST/DoLTEst.git
+cd DoLTEst
+mkdir build && cd build
+cmake ..
+make -j4
 ```
 
-Install srsLTE:
-
+**Executing**
 ```
-sudo make install
-srslte_install_configs.sh user
+(Terminal 1)
+cd ($DoLTEst)/build/srsepc/src
+sudo ./srsepc ../../../conf/epc/epc.conf
 ```
-
-This installs srsLTE and also copies the default srsLTE config files to
-the user's home directory (~/.config/srslte).
-
-
-Execution Instructions
-----------------------
-
-The srsUE, srsENB and srsEPC applications include example configuration files
-that should be copied (manually or by using the convenience script) and modified,
-if needed, to meet the system configuration.
-On many systems they should work out of the box.
-
-By default, all applications will search for config files in the user's home
-directory (~/.config/srslte) upon startup.
-
-Note that you have to execute the applications with root privileges to enable
-real-time thread priorities and to permit creation of virtual network interfaces.
-
-srsENB and srsEPC can run on the same machine as a network-in-the-box configuration.
-srsUE needs to run on a separate machine.
-
-If you have installed the software suite using ```sudo make install``` and
-have installed the example config files using ```srslte_install_configs.sh user```,
-you may just start all applications with their default parameters.
-
-### srsEPC
-
-On machine 1, run srsEPC as follows:
-
 ```
-sudo srsepc
+(Terminal 2)
+cd ($DoLTEst)/build/srsenb/src
+sudo ./srsenb ../../../conf/enb/enb.conf
 ```
 
-Using the default configuration, this creates a virtual network interface
-named "srs_spgw_sgi" on machine 1 with IP 172.16.0.1. All connected UEs
-will be assigned an IP in this network.
+When the test UE connects to srseNB, DoLTEst starts: it moves the testing UE's state to the target state, and sends the test message, in the following order: 1. ```(No-SC state, NAS testing)``` -> 2. ```(No-SC state, RRC testing)``` -> 3. ```(N-SC state, NAS testing)``` -> ...
 
-### srsENB
+You can see the testing progress on the terminal. 
+![example.png](./img/example.gif)
+To finish the test, press ```ctrl + c``` to stop the srsEPC and srseNB. After then, please check the **enb.pcap** to analyze the result. 
+The intermediate test progress files, **doltest_stat_nas** and **doltest_stat_rrc** under ($DoLTEst)/conf/ are updated after sending each test message. 
 
-Also on machine 1, but in another console, run srsENB as follows:
-
+# Tips
+- If UE does not try to re-attach for a long time, toggle airplane mode. 
+- When stopping the test, we recommend to stop ```srsEPC``` -> turn on ```airplane mode``` on ```UE``` -> stop ```srseNB```. To start again, start ```srsEPC``` -> start ```srseNB``` -> turn off ```airplane mode``` on UE
+- If you are using the Faraday cage, you need to operate another srseNB to test two IEs related to measurement and handover. You need to put the other eNB's EARFCN and PCI value on the following function, and recompile. 
 ```
-sudo srsenb
+($DoLTEst)/srsenb/src/stack/rrc/rrc.cc
+1) Change target measurement frequency in function doltest_rrc_conn_recfg. Search for '//[DoLTEst] Change this EARFCN'
+2) Change target cell pci in function doltest_rrc_conn_recfg. Search for '// [DoLTEst] Change this PCI' 
 ```
+- Options: Two modes at srsEPC, 
+  - ```--reset-ctxt-mode```: Network will send Attach Reject with cause _illegal UE_ to delete UE's previous security context (default: false) 
+  - ```--long-test-mode```: DoLTEst will test every identity type values (default: false). 
 
-### srsUE
+# Finding bugs
+- For each test message, UE sending a corresponding response message is a bug, except for the below cases. 
+- UE sending a reject or an error message (```Security Mode Failure```, ```EMM Status```, ```RRC ConnectionReestablishmentRequest```) is not a bug. 
+- UE sending ```RRC ConnectionReconfigurationComplete``` message for the test message ```RRC ConnectionReconfiguration``` with ```measConfig``` at state ```No-SC``` and ```N-SC``` is standard-compliant behavior. However, sending ```MeasurementReport``` is a bug. 
+- When testing RRC message, UE responding to ```UE CapabilityEnquiry```, ```DLInformationTransfer```, or accepting ```RRC Connection Release``` at state ```No-SC``` and ```N-SC``` is not a bug. 
+- When testing NAS message, UE sending Identity Response with its IMSI at state ```No-SC``` is not a bug. 
 
-On machine 2, run srsUE as follows:
+If you need any help for verifing the UE's behavior, please contact fermioncj@kaist.ac.kr. 
+Also, we wonder if DoLTEst helped you to find a vulnerability. Please let us know!
 
+# Credits
+We sincerely appreciate the [SRS team](https://www.srs.io) for making their great software available :)
+
+# BibTex
+Please refer to [our
+paper](https://www.usenix.org/system/files/sec22summer_park-cheoljun.pdf) for more details. 
+
+```bibtex
+@inproceedings{park:doltest,
+  title = {{DoLTEst: In-depth Downlink Negative Testing Framework for LTE Devices}},
+  author = {Park, CheolJun and Bae, Sangwook and Oh, BeomSeok and Lee, Jiho and Lee, Eunkyu and Yun, Insu and Kim, Yongdae},
+  booktitle = {31th USENIX Security Symposium (USENIX Security 22)},
+  year = {2022}
+}
 ```
-sudo srsue
-```
-
-Using the default configuration, this creates a virtual network interface
-named "tun_srsue" on machine 2 with an IP in the network 172.16.0.x.
-Assuming the UE has been assigned IP 172.16.0.2, you may now exchange
-IP traffic with machine 1 over the LTE link. For example, run a ping to 
-the default SGi IP address:
-
-```
-ping 172.16.0.1
-```
-
-Support
-========
-
-Mailing list: http://www.softwareradiosystems.com/mailman/listinfo/srslte-users

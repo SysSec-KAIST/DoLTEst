@@ -41,18 +41,32 @@ typedef enum{
     CIPHERING_ALGORITHM_ID_128_EEA2,
     CIPHERING_ALGORITHM_ID_N_ITEMS,
 }CIPHERING_ALGORITHM_ID_ENUM;
-static const char ciphering_algorithm_id_text[CIPHERING_ALGORITHM_ID_N_ITEMS][20] = {"EEA0",
+//static const char ciphering_algorithm_id_text[CIPHERING_ALGORITHM_ID_N_ITEMS][20] = {"EEA0",
+static const char ciphering_algorithm_id_text[8][50] =                               {"EEA0",
                                                                                      "128-EEA1",
-                                                                                     "128-EEA2"};
+                                                                                     "128-EEA2",
+                                                                                     "128-EEA3 (not implemented)",
+                                                                                     "EEA4 (reserved)",
+                                                                                     "EEA5 (reserved)",
+                                                                                     "EEA6 (reserved)",
+                                                                                     "EEA7 (reserved)",
+};
 typedef enum{
     INTEGRITY_ALGORITHM_ID_EIA0 = 0,
     INTEGRITY_ALGORITHM_ID_128_EIA1,
     INTEGRITY_ALGORITHM_ID_128_EIA2,
     INTEGRITY_ALGORITHM_ID_N_ITEMS,
 }INTEGRITY_ALGORITHM_ID_ENUM;
-static const char integrity_algorithm_id_text[INTEGRITY_ALGORITHM_ID_N_ITEMS][20] = {"EIA0",
+//static const char integrity_algorithm_id_text[INTEGRITY_ALGORITHM_ID_N_ITEMS][20] = {"EIA0",
+static const char integrity_algorithm_id_text[8][50] =                               {"EIA0",
                                                                                      "128-EIA1",
-                                                                                     "128-EIA2"};
+                                                                                     "128-EIA2",
+                                                                                     "128-EIA3 (not implemented)",
+                                                                                     "EIA4 (reserved)",
+                                                                                     "EIA5 (reserved)",
+                                                                                     "EIA6 (reserved)",
+                                                                                     "EIA7 (reserved)",
+};      
 
 
 /******************************************************************************

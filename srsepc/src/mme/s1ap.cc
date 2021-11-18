@@ -268,6 +268,13 @@ bool s1ap::handle_initiating_message(LIBLTE_S1AP_INITIATINGMESSAGE_STRUCT* msg, 
       m_s1ap_ctx_mngmt_proc->handle_ue_context_release_request(&msg->choice.UEContextReleaseRequest, enb_sri,
                                                                reply_buffer, &reply_flag);
       break;
+    case LIBLTE_S1AP_INITIATINGMESSAGE_CHOICE_ERRORINDICATION:
+      m_s1ap_log->info("Received Error Indication Message for IDENTITY REQUEST TESTING.\n");
+      m_s1ap_ctx_mngmt_proc->handle_error_indication(&msg->choice.ErrorIndication, enb_sri, 
+                                                                    &reply_flag); 
+
+      break;
+
     default:
       m_s1ap_log->error("Unhandled S1AP intiating message: %s\n",
                         liblte_s1ap_initiatingmessage_choice_text[msg->choice_type]);

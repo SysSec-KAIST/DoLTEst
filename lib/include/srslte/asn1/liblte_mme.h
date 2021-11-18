@@ -2363,6 +2363,8 @@ const char* liblte_nas_sec_hdr_type_to_string(int code);
 #define LIBLTE_MME_MSG_TYPE_CS_SERVICE_NOTIFICATION 0x64
 #define LIBLTE_MME_MSG_TYPE_DOWNLINK_GENERIC_NAS_TRANSPORT 0x68
 #define LIBLTE_MME_MSG_TYPE_UPLINK_GENERIC_NAS_TRANSPORT 0x69
+#define LIBLTE_MME_MSG_TYPE_CLOSE_UE_TEST_LOOP 0x80
+#define LIBLTE_MME_MSG_TYPE_CLOSE_UE_TEST_LOOP_COMPLETE 0x81
 #define LIBLTE_MME_MSG_TYPE_ACTIVATE_TEST_MODE 0x84
 #define LIBLTE_MME_MSG_TYPE_ACTIVATE_TEST_MODE_COMPLETE 0x85
 #define LIBLTE_MME_MSG_TYPE_DEACTIVATE_TEST MODE 0x86
@@ -2510,7 +2512,10 @@ LIBLTE_ERROR_ENUM liblte_mme_pack_attach_reject_msg(LIBLTE_MME_ATTACH_REJECT_MSG
                                                     LIBLTE_BYTE_MSG_STRUCT*              msg);
 LIBLTE_ERROR_ENUM liblte_mme_unpack_attach_reject_msg(LIBLTE_BYTE_MSG_STRUCT*              msg,
                                                       LIBLTE_MME_ATTACH_REJECT_MSG_STRUCT* attach_rej);
-
+LIBLTE_ERROR_ENUM liblte_mme_pack_attach_reject_msg_sec(LIBLTE_MME_ATTACH_REJECT_MSG_STRUCT* attach_rej,
+                                                     uint8                                 sec_hdr_type,
+                                                     uint32                                count,
+                                                     LIBLTE_BYTE_MSG_STRUCT*               msg);
 /*********************************************************************
     Message Name: Attach Request
 
@@ -2684,6 +2689,11 @@ liblte_mme_unpack_authentication_response_msg(LIBLTE_BYTE_MSG_STRUCT*           
 // Structs
 // Functions
 // FIXME
+typedef struct {
+} LIBLTE_MME_CS_SERVICE_NOTIFICATION_MSG_STRUCT;
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_cs_service_notification_msg(uint8             paging_id, 
+                                                              LIBLTE_BYTE_MSG_STRUCT* msg);
 
 /*********************************************************************
     Message Name: Detach Accept
@@ -2729,6 +2739,19 @@ LIBLTE_ERROR_ENUM liblte_mme_pack_detach_request_msg(LIBLTE_MME_DETACH_REQUEST_M
                                                      LIBLTE_BYTE_MSG_STRUCT*               msg);
 LIBLTE_ERROR_ENUM liblte_mme_unpack_detach_request_msg(LIBLTE_BYTE_MSG_STRUCT*               msg,
                                                        LIBLTE_MME_DETACH_REQUEST_MSG_STRUCT* detach_req);
+
+
+
+typedef struct {
+  LIBLTE_MME_DETACH_TYPE_STRUCT    detach_type;
+} LIBLTE_MME_DETACH_REQUEST_NET_MSG_STRUCT;
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_detach_request_net_msg(LIBLTE_MME_DETACH_REQUEST_NET_MSG_STRUCT* detach_req,
+                                                     uint8                                 sec_hdr_type,
+                                                     uint32                                count,
+                                                     LIBLTE_BYTE_MSG_STRUCT*               msg);
+
+
 
 /*********************************************************************
     Message Name: Downlink NAS Transport
@@ -2917,6 +2940,10 @@ typedef struct {
   uint8 id_type;
 } LIBLTE_MME_ID_REQUEST_MSG_STRUCT;
 // Functions
+LIBLTE_ERROR_ENUM liblte_mme_pack_identity_request_msg_sec(LIBLTE_MME_ID_REQUEST_MSG_STRUCT *id_req,
+																													uint8 sec_hdr_type,
+																													uint32 count,
+                                                          LIBLTE_BYTE_MSG_STRUCT           *msg);
 LIBLTE_ERROR_ENUM liblte_mme_pack_identity_request_msg(LIBLTE_MME_ID_REQUEST_MSG_STRUCT* id_req,
                                                        LIBLTE_BYTE_MSG_STRUCT*           msg);
 LIBLTE_ERROR_ENUM liblte_mme_unpack_identity_request_msg(LIBLTE_BYTE_MSG_STRUCT*           msg,
@@ -3186,9 +3213,17 @@ liblte_mme_unpack_tracking_area_update_reject_msg(LIBLTE_BYTE_MSG_STRUCT*       
 *********************************************************************/
 // Defines
 // Enums
-// Structs
+typedef struct {
+  LIBLTE_MME_NAS_KEY_SET_ID_STRUCT                         nas_ksi;
+  LIBLTE_MME_EPS_UPDATE_TYPE_STRUCT                        eps_update_type;          
+  LIBLTE_MME_EPS_MOBILE_ID_STRUCT                          old_guti;
+  // not implemented optionals
+} LIBLTE_MME_TRACKING_AREA_UPDATE_REQUEST_MSG_STRUCT;
 // Functions
+LIBLTE_ERROR_ENUM liblte_mme_unpack_tracking_area_update_request_msg(LIBLTE_BYTE_MSG_STRUCT*                             msg,
+                                                                     LIBLTE_MME_TRACKING_AREA_UPDATE_REQUEST_MSG_STRUCT* tau_req);
 // FIXME
+
 
 /*********************************************************************
     Message Name: Uplink NAS Transport
@@ -3357,6 +3392,12 @@ typedef struct {
 LIBLTE_ERROR_ENUM liblte_mme_pack_activate_dedicated_eps_bearer_context_request_msg(
     LIBLTE_MME_ACTIVATE_DEDICATED_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* act_ded_eps_bearer_context_req,
     LIBLTE_BYTE_MSG_STRUCT*                                              msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_activate_dedicated_eps_bearer_context_request_msg_sec(
+    LIBLTE_MME_ACTIVATE_DEDICATED_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* act_ded_eps_bearer_context_req,
+    LIBLTE_BYTE_MSG_STRUCT*                                              msg);
+
+
 LIBLTE_ERROR_ENUM liblte_mme_unpack_activate_dedicated_eps_bearer_context_request_msg(
     LIBLTE_BYTE_MSG_STRUCT*                                              msg,
     LIBLTE_MME_ACTIVATE_DEDICATED_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* act_ded_eps_bearer_context_req);
@@ -3385,6 +3426,8 @@ LIBLTE_ERROR_ENUM liblte_mme_pack_activate_default_eps_bearer_context_accept_msg
 LIBLTE_ERROR_ENUM liblte_mme_unpack_activate_default_eps_bearer_context_accept_msg(
     LIBLTE_BYTE_MSG_STRUCT*                                           msg,
     LIBLTE_MME_ACTIVATE_DEFAULT_EPS_BEARER_CONTEXT_ACCEPT_MSG_STRUCT* act_def_eps_bearer_context_accept);
+
+
 
 /*********************************************************************
     Message Name: Activate Default EPS Bearer Context Reject
@@ -3464,6 +3507,13 @@ LIBLTE_ERROR_ENUM liblte_mme_unpack_activate_default_eps_bearer_context_request_
     LIBLTE_BYTE_MSG_STRUCT*                                            msg,
     LIBLTE_MME_ACTIVATE_DEFAULT_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* act_def_eps_bearer_context_req);
 
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_activate_default_eps_bearer_context_request_msg_sec(
+    LIBLTE_MME_ACTIVATE_DEFAULT_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* act_def_eps_bearer_context_req,
+    uint8                                                              sec_hdr_type,
+    uint32                                                             count,
+    LIBLTE_BYTE_MSG_STRUCT*                                            msg);
+
 /*********************************************************************
     Message Name: Bearer Resource Allocation Reject
 
@@ -3488,6 +3538,11 @@ typedef struct {
 // Functions
 LIBLTE_ERROR_ENUM liblte_mme_pack_bearer_resource_allocation_reject_msg(
     LIBLTE_MME_BEARER_RESOURCE_ALLOCATION_REJECT_MSG_STRUCT* bearer_res_alloc_rej, LIBLTE_BYTE_MSG_STRUCT* msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_bearer_resource_allocation_reject_msg_sec(
+    LIBLTE_MME_BEARER_RESOURCE_ALLOCATION_REJECT_MSG_STRUCT* bearer_res_alloc_rej, uint8 sec_hdr_type, uint32 count, LIBLTE_BYTE_MSG_STRUCT* msg);
+
+
 LIBLTE_ERROR_ENUM liblte_mme_unpack_bearer_resource_allocation_reject_msg(
     LIBLTE_BYTE_MSG_STRUCT* msg, LIBLTE_MME_BEARER_RESOURCE_ALLOCATION_REJECT_MSG_STRUCT* bearer_res_alloc_rej);
 
@@ -3543,6 +3598,10 @@ typedef struct {
 // Functions
 LIBLTE_ERROR_ENUM liblte_mme_pack_bearer_resource_modification_reject_msg(
     LIBLTE_MME_BEARER_RESOURCE_MODIFICATION_REJECT_MSG_STRUCT* bearer_res_mod_rej, LIBLTE_BYTE_MSG_STRUCT* msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_bearer_resource_modification_reject_msg_sec(
+    LIBLTE_MME_BEARER_RESOURCE_MODIFICATION_REJECT_MSG_STRUCT* bearer_res_mod_rej, uint8 sec_hdr_type, uint32 count, LIBLTE_BYTE_MSG_STRUCT* msg);
+
 LIBLTE_ERROR_ENUM liblte_mme_unpack_bearer_resource_modification_reject_msg(
     LIBLTE_BYTE_MSG_STRUCT* msg, LIBLTE_MME_BEARER_RESOURCE_MODIFICATION_REJECT_MSG_STRUCT* bearer_res_mod_rej);
 
@@ -3629,6 +3688,14 @@ typedef struct {
 LIBLTE_ERROR_ENUM liblte_mme_pack_deactivate_eps_bearer_context_request_msg(
     LIBLTE_MME_DEACTIVATE_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* deact_eps_bearer_context_req,
     LIBLTE_BYTE_MSG_STRUCT*                                      msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_deactivate_eps_bearer_context_request_msg_sec(
+    LIBLTE_MME_DEACTIVATE_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* deact_eps_bearer_context_req,
+    uint8                                                        sec_hdr_type,
+    uint32                                                       count,
+    LIBLTE_BYTE_MSG_STRUCT*                                      msg);
+
+
 LIBLTE_ERROR_ENUM liblte_mme_unpack_deactivate_eps_bearer_context_request_msg(
     LIBLTE_BYTE_MSG_STRUCT*                                      msg,
     LIBLTE_MME_DEACTIVATE_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* deact_eps_bearer_context_req);
@@ -3715,6 +3782,13 @@ typedef struct {
 // Functions
 LIBLTE_ERROR_ENUM liblte_mme_pack_esm_status_msg(LIBLTE_MME_ESM_STATUS_MSG_STRUCT* esm_status,
                                                  LIBLTE_BYTE_MSG_STRUCT*           msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_esm_status_msg_sec(LIBLTE_MME_ESM_STATUS_MSG_STRUCT* esm_status,
+                                                     uint8                             sec_hdr_type,
+                                                     uint32                            count,
+                                                     LIBLTE_BYTE_MSG_STRUCT*           msg);
+
+
 LIBLTE_ERROR_ENUM liblte_mme_unpack_esm_status_msg(LIBLTE_BYTE_MSG_STRUCT*           msg,
                                                    LIBLTE_MME_ESM_STATUS_MSG_STRUCT* esm_status);
 
@@ -3804,6 +3878,10 @@ typedef struct {
 // Functions
 LIBLTE_ERROR_ENUM liblte_mme_pack_modify_eps_bearer_context_request_msg(
     LIBLTE_MME_MODIFY_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* mod_eps_bearer_context_req, LIBLTE_BYTE_MSG_STRUCT* msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_modify_eps_bearer_context_request_msg_sec(
+    LIBLTE_MME_MODIFY_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* mod_eps_bearer_context_req, uint8 sec_hdr_type, uint32 count, LIBLTE_BYTE_MSG_STRUCT* msg);
+
 LIBLTE_ERROR_ENUM liblte_mme_unpack_modify_eps_bearer_context_request_msg(
     LIBLTE_BYTE_MSG_STRUCT* msg, LIBLTE_MME_MODIFY_EPS_BEARER_CONTEXT_REQUEST_MSG_STRUCT* mod_eps_bearer_context_req);
 
@@ -3828,6 +3906,13 @@ typedef struct {
 // Functions
 LIBLTE_ERROR_ENUM liblte_mme_pack_notification_msg(LIBLTE_MME_NOTIFICATION_MSG_STRUCT* notification,
                                                    LIBLTE_BYTE_MSG_STRUCT*             msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_notification_msg_sec(LIBLTE_MME_NOTIFICATION_MSG_STRUCT* notification,
+                                                       uint8                               sec_hdr_type,
+                                                       uint32                              count,
+                                                       LIBLTE_BYTE_MSG_STRUCT*             msg);
+
+
 LIBLTE_ERROR_ENUM liblte_mme_unpack_notification_msg(LIBLTE_BYTE_MSG_STRUCT*             msg,
                                                      LIBLTE_MME_NOTIFICATION_MSG_STRUCT* notification);
 
@@ -3854,6 +3939,11 @@ typedef struct {
 // Functions
 LIBLTE_ERROR_ENUM
 liblte_mme_pack_pdn_connectivity_reject_msg(LIBLTE_MME_PDN_CONNECTIVITY_REJECT_MSG_STRUCT* pdn_con_rej,
+                                            LIBLTE_BYTE_MSG_STRUCT*                        msg);
+LIBLTE_ERROR_ENUM
+liblte_mme_pack_pdn_connectivity_reject_msg_sec(LIBLTE_MME_PDN_CONNECTIVITY_REJECT_MSG_STRUCT* pdn_con_rej,
+                                            uint8 sec_hdr_type,
+																						uint32 count,
                                             LIBLTE_BYTE_MSG_STRUCT*                        msg);
 LIBLTE_ERROR_ENUM
 liblte_mme_unpack_pdn_connectivity_reject_msg(LIBLTE_BYTE_MSG_STRUCT*                        msg,
@@ -3916,6 +4006,13 @@ typedef struct {
 // Functions
 LIBLTE_ERROR_ENUM liblte_mme_pack_pdn_disconnect_reject_msg(LIBLTE_MME_PDN_DISCONNECT_REJECT_MSG_STRUCT* pdn_discon_rej,
                                                             LIBLTE_BYTE_MSG_STRUCT*                      msg);
+
+LIBLTE_ERROR_ENUM liblte_mme_pack_pdn_disconnect_reject_msg_sec(LIBLTE_MME_PDN_DISCONNECT_REJECT_MSG_STRUCT* pdn_discon_rej,
+                                                                uint8                                        sec_hdr_type,
+                                                                uint32                                       count,
+                                                                LIBLTE_BYTE_MSG_STRUCT*                      msg);
+
+
 LIBLTE_ERROR_ENUM
 liblte_mme_unpack_pdn_disconnect_reject_msg(LIBLTE_BYTE_MSG_STRUCT*                      msg,
                                             LIBLTE_MME_PDN_DISCONNECT_REJECT_MSG_STRUCT* pdn_discon_rej);

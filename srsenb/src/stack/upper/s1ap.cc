@@ -275,6 +275,57 @@ bool s1ap::is_mme_connected()
   return mme_connected;
 }
 
+
+// DoLTEst : This message is used by RRC to ask EPC to send NAS Identity Request
+// To test the security of RRC DLInformationTransfer message, we need a NAS payload to examine the result. 
+// This is because the RRC DLInformationTransfer message do not have a response message. 
+// Except for the No-SC state, NAS payload is security protected with a valid MAC. 
+// If a UE sends a NAS Identity Response message, we can know that it does not check the security of RRC DLInfoTransfer message. 
+//
+bool s1ap::send_identity_request_for_testing(uint16_t rnti)
+{
+  if(!mme_connected) {
+    return false;
+  }
+  srslte::byte_buffer_t msg;
+
+  LIBLTE_S1AP_S1AP_PDU_STRUCT tx_pdu;
+  tx_pdu.ext          = false;
+  tx_pdu.choice_type  = LIBLTE_S1AP_S1AP_PDU_CHOICE_INITIATINGMESSAGE;
+
+  LIBLTE_S1AP_INITIATINGMESSAGE_STRUCT *init = &tx_pdu.choice.initiatingMessage;
+  init->procedureCode = LIBLTE_S1AP_PROC_ID_ERRORINDICATION;
+  init->choice_type   = LIBLTE_S1AP_INITIATINGMESSAGE_CHOICE_ERRORINDICATION;
+
+  LIBLTE_S1AP_MESSAGE_ERRORINDICATION_STRUCT *idrq = &init->choice.ErrorIndication;
+  idrq->ext                                       = false;
+  idrq->MME_UE_S1AP_ID_present                    = true;
+  idrq->eNB_UE_S1AP_ID_present                    = true;
+  idrq->Cause_present                             = false;
+  idrq->CriticalityDiagnostics_present            = false;
+
+  // MME_UE_S1AP_ID
+  idrq->MME_UE_S1AP_ID.MME_UE_S1AP_ID = ue_ctxt_map[rnti].MME_UE_S1AP_ID;
+  // ENB_UE_S1AP_ID
+  idrq->eNB_UE_S1AP_ID.ENB_UE_S1AP_ID = ue_ctxt_map[rnti].eNB_UE_S1AP_ID;
+
+
+  liblte_s1ap_pack_s1ap_pdu(&tx_pdu, (LIBLTE_BYTE_MSG_STRUCT*)&msg);
+  s1ap_log->info_hex(msg.msg, msg.N_bytes, "[DoLTEst] Requesting NAS Identity Request message using S1AP ERRORINDICATION msg for :0x%x", rnti);
+
+  ssize_t n_sent = sctp_sendmsg(socket_fd, msg.msg, msg.N_bytes,
+                                (struct sockaddr*)&mme_addr, sizeof(struct sockaddr_in),
+                                htonl(PPID), 0, ue_ctxt_map[rnti].stream_id, 0, 0);
+  if(n_sent == -1) {
+    s1ap_log->error("[DoLTEst] Failed to Request NAS Identity Request message using S1AP ERRORINDICATION msg for RNTI:0x%x\n", rnti);
+    return false;
+  }
+
+  return true;
+}
+
+
+
 /*******************************************************************************
 /* S1AP connection helpers
 ********************************************************************************/
@@ -1145,6 +1196,12 @@ bool s1ap::send_uectxmodifyfailure(uint16_t rnti, LIBLTE_S1AP_CAUSE_STRUCT* caus
 
   return true;
 }
+
+
+
+
+
+
 
 //bool s1ap::send_ue_capabilities(uint16_t rnti, LIBLTE_RRC_UE_EUTRA_CAPABILITY_STRUCT *caps)
 //{

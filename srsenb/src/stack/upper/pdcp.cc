@@ -151,6 +151,20 @@ void pdcp::write_sdu(uint16_t rnti, uint32_t lcid, srslte::unique_byte_buffer_t 
   pthread_rwlock_unlock(&rwlock);
 }
 
+void pdcp::write_sdu_doltest(uint16_t rnti, uint32_t lcid, srslte::unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest)
+{
+  pthread_rwlock_rdlock(&rwlock);
+  if (users.count(rnti)) {
+    if(rnti != SRSLTE_MRNTI){
+      users[rnti].pdcp->write_sdu_doltest(lcid, std::move(sdu), integ_algo_doltest, cipher_algo_doltest);
+    }else {
+      users[rnti].pdcp->write_sdu_mch(lcid, std::move(sdu));
+    }
+  }
+  pthread_rwlock_unlock(&rwlock);
+}
+
+
 void pdcp::user_interface_gtpu::write_pdu(uint32_t lcid, srslte::unique_byte_buffer_t pdu)
 {
   gtpu->write_pdu(rnti, lcid, std::move(pdu));

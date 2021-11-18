@@ -30,6 +30,8 @@
 #include "srslte/interfaces/epc_interfaces.h"
 #include <netinet/sctp.h>
 
+#include "fzmanager_epc.h"
+
 namespace srsepc {
 
 static const uint8_t MAX_ERABS_PER_UE = 16;
@@ -137,6 +139,8 @@ typedef struct {
   std::string                         dns;
   srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo;
   srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo;
+  bool                                reset_ctxt_mode;
+  bool                                long_test_mode;
 } nas_init_t;
 
 typedef struct {
@@ -189,6 +193,14 @@ public:
                                                     nas_if_t                                              itf,
                                                     srslte::log*                                          nas_log);
 
+  static bool handle_attach_request_ue_ctxt_delete(uint32_t                                    enb_ue_s1ap_id,
+                                                   struct sctp_sndrcvinfo*                     enb_sri,
+                                                   const LIBLTE_MME_ATTACH_REQUEST_MSG_STRUCT& attach_req,
+                                                   const LIBLTE_MME_PDN_CONNECTIVITY_REQUEST_MSG_STRUCT& pdn_con_req,
+                                                   nas_init_t                                            args,
+                                                   nas_if_t                                              itf,
+                                                   srslte::log*                                          nas_log);
+
   static bool handle_guti_attach_request_known_ue(nas*                                                  nas_ctx,
                                                   uint32_t                                              enb_ue_s1ap_id,
                                                   struct sctp_sndrcvinfo*                               enb_sri,
@@ -226,6 +238,14 @@ public:
                                                   nas_if_t                itf,
                                                   srslte::log*            nas_log);
 
+
+  static bool handle_attach_request_with_sec_hdr(    uint32_t                enb_ue_s1ap_id,
+                                                     struct sctp_sndrcvinfo* enb_sri,
+                                                     nas_init_t              args,
+                                                     nas_if_t                itf,
+                                                     srslte::log*            nas_log);
+
+
   /* Uplink NAS messages handling */
   bool handle_attach_request(srslte::byte_buffer_t* nas_rx);
   bool handle_authentication_response(srslte::byte_buffer_t* nas_rx);
@@ -236,6 +256,11 @@ public:
   bool handle_tracking_area_update_request(srslte::byte_buffer_t* nas_rx);
   bool handle_authentication_failure(srslte::byte_buffer_t* nas_rx);
   bool handle_detach_request(srslte::byte_buffer_t* nas_rx);
+  bool handle_activate_test_mode_complete(srslte::byte_buffer_t* nas_rx);
+  bool handle_close_ue_test_loop_complete(srslte::byte_buffer_t* nas_rx);
+  bool handle_emm_status(srslte::byte_buffer_t* nas_rx);
+  bool handle_security_mode_reject(srslte::byte_buffer_t* nas_rx);
+
 
   /* Downlink NAS messages packing */
   bool pack_authentication_request(srslte::byte_buffer_t* nas_buffer);
@@ -246,6 +271,9 @@ public:
   bool pack_emm_information(srslte::byte_buffer_t* nas_buffer);
   bool pack_service_reject(srslte::byte_buffer_t* nas_buffer, uint8_t emm_cause);
   bool pack_attach_accept(srslte::byte_buffer_t* nas_buffer);
+  bool pack_detach_request(srslte::byte_buffer_t* nas_buffer);
+  bool pack_attach_reject(srslte::byte_buffer_t* nas_buffer);
+  bool pack_tau_reject(srslte::byte_buffer_t* nas_buffer);
 
   /* Security functions */
   bool integrity_check(srslte::byte_buffer_t* pdu);
@@ -264,11 +292,19 @@ public:
   esm_ctx_t m_esm_ctx[MAX_ERABS_PER_UE] = {};
   sec_ctx_t m_sec_ctx                   = {};
 
+  srslte::log*              m_nas_log = nullptr;
+  s1ap_interface_nas*       m_s1ap    = nullptr;
+
+  fzmanager_epc*            m_fzmanager_epc = nullptr;
+
+  bool                      m_reset_ctxt_mode = false;
+  bool                      m_long_test_mode  = false;
+
 private:
   srslte::byte_buffer_pool* m_pool    = nullptr;
-  srslte::log*              m_nas_log = nullptr;
+  //srslte::log*              m_nas_log = nullptr;
   gtpc_interface_nas*       m_gtpc    = nullptr;
-  s1ap_interface_nas*       m_s1ap    = nullptr;
+  //s1ap_interface_nas*       m_s1ap    = nullptr; // move to public
   hss_interface_nas*        m_hss     = nullptr;
   mme_interface_nas*        m_mme     = nullptr;
 

@@ -211,6 +211,7 @@ public:
   virtual void add_user(uint16_t rnti) = 0; 
   virtual void rem_user(uint16_t rnti) = 0;
   virtual void write_sdu(uint16_t rnti, uint32_t lcid, srslte::unique_byte_buffer_t sdu)   = 0;
+  virtual void write_sdu_doltest(uint16_t rnti, uint32_t lcid, srslte::unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest)  =  0;
   virtual void add_bearer(uint16_t rnti, uint32_t lcid, srslte::srslte_pdcp_config_t cnfg) = 0;
   virtual void config_security(uint16_t rnti, 
                                uint32_t lcid,
@@ -306,6 +307,7 @@ public:
   virtual void ue_ctxt_setup_complete(uint16_t rnti, LIBLTE_S1AP_MESSAGE_INITIALCONTEXTSETUPRESPONSE_STRUCT *res) = 0;
   virtual void ue_erab_setup_complete(uint16_t rnti, LIBLTE_S1AP_MESSAGE_E_RABSETUPRESPONSE_STRUCT *res) = 0;
   virtual bool is_mme_connected() = 0;
+  virtual bool send_identity_request_for_testing(uint16_t rnti) = 0;
 };
 
 // Combined interface for PHY to access stack (MAC and RRC)

@@ -48,6 +48,8 @@ typedef struct {
   std::string                         pcap_filename;
   srslte::CIPHERING_ALGORITHM_ID_ENUM encryption_algo;
   srslte::INTEGRITY_ALGORITHM_ID_ENUM integrity_algo;
+  bool                                reset_ctxt_mode;
+  bool                                long_test_mode;
 } s1ap_args_t;
 
 typedef struct{

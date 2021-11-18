@@ -48,6 +48,7 @@ public:
   void add_user(uint16_t rnti);  
   void rem_user(uint16_t rnti);
   void write_sdu(uint16_t rnti, uint32_t lcid, srslte::unique_byte_buffer_t sdu);
+  void write_sdu_doltest(uint16_t rnti, uint32_t lcid, srslte::unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest);
   void add_bearer(uint16_t rnti, uint32_t lcid, srslte::srslte_pdcp_config_t cnfg);
   void config_security(uint16_t rnti, 
                        uint32_t lcid,

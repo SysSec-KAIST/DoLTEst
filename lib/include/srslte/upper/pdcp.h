@@ -48,6 +48,7 @@ public:
   void     reestablish(uint32_t lcid);
   void reset();
   void     write_sdu(uint32_t lcid, unique_byte_buffer_t sdu, bool blocking = true);
+  void     write_sdu_doltest(uint32_t lcid, unique_byte_buffer_t sdu, srslte::INTEGRITY_ALGORITHM_ID_ENUM integ_algo_doltest, srslte::CIPHERING_ALGORITHM_ID_ENUM cipher_algo_doltest, bool blocking = true);
   void     write_sdu_mch(uint32_t lcid, unique_byte_buffer_t sdu);
   void add_bearer(uint32_t lcid, srslte_pdcp_config_t cnfg = srslte_pdcp_config_t());
   void add_bearer_mrb(uint32_t lcid, srslte_pdcp_config_t cnfg = srslte_pdcp_config_t());

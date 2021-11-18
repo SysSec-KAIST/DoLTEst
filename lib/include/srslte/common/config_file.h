@@ -25,6 +25,8 @@
 #include <fstream>
 #include <pwd.h>
 #include "common.h"
+#include <unistd.h>
+#include <sys/types.h>
 
 bool config_exists(std::string &filename, std::string default_name)
 {
